@@ -1,42 +1,80 @@
 import {
-  serve,
+  listenAndServe,
   ServerRequest,
-} from "https://deno.land/std@0.53.0/http/server.ts";
-import { WebSocketServer } from "https://deno.land/x/websocket_server/mod.ts";
+  acceptWebSocket,
+  isWebSocketCloseEvent,
+  WebSocket,
+} from "./deps.ts";
+import { routes } from "./router.ts";
+import {
+  getStore,
+  addUser,
+  removeUser,
+  changeName,
+  joinRoom,
+} from "./store.ts";
 
-const wss = new WebSocketServer();
-const http = serve(":8080");
+const PORT = 8080;
 
-async function serverHandler(wss: WebSocketServer) {
-  for await (const { event, socket } of wss) {
-    console.log(event);
+async function handleWebsocketEvent(sock: WebSocket) {
+  console.log("ws:connected");
+
+  addUser(sock.conn.rid);
+
+  try {
+    for await (const ev of sock) {
+      if (typeof ev === "string") {
+        console.log("ws:text", ev);
+        // await sock.send(ev);
+        if (ev.startsWith("join:")) {
+          const [command, roomid] = ev.split(":");
+          joinRoom(sock.conn.rid, roomid);
+        }
+
+        if (ev.startsWith("changename:")) {
+          const [command, name] = ev.split(":");
+          changeName(sock.conn.rid, name);
+        }
+      } else if (isWebSocketCloseEvent(ev)) {
+        const { code, reason } = ev;
+        console.log("ws:close", code, reason);
+        removeUser(sock.conn.rid);
+      }
+    }
+  } catch (err) {
+    console.error(`failed to receive frame: ${err}`);
+
+    if (!sock.isClosed) {
+      await sock.close(1000).catch(console.error);
+    }
   }
 }
 
-serverHandler(wss);
+listenAndServe(`:${PORT}`, async (request: ServerRequest) => {
+  if (request.url === "/ws") {
+    acceptWebSocket({
+      conn: request.conn,
+      bufReader: request.r,
+      bufWriter: request.w,
+      headers: request.headers,
+    })
+      .then(handleWebsocketEvent)
+      .catch(async (err) => {
+        console.error(`failed to accept websocket: ${err}`);
+        await request.respond({ status: 400 });
+      });
+    return;
+  }
 
-const routes = new Map();
+  const [path, query] = request.url.split("?");
 
-routes.set("/rooms", async (request: ServerRequest) => {
+  if (routes.has(path)) {
+    routes.get(path)(request, getStore());
+    return;
+  }
+
   await request.respond({
-    body: "Rooms",
-    status: 200,
+    body: "Not Found",
+    status: 404,
   });
 });
-
-for await (const request of http) {
-  if (request.url === "/ws") {
-    wss.handleUpgrade(request);
-    break;
-  } else {
-    if (routes.has(request.url)) {
-      routes.get(request.url)(request);
-      break;
-    }
-
-    await request.respond({
-      body: "Not Found",
-      status: 404,
-    });
-  }
-}
