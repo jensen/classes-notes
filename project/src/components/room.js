@@ -24,16 +24,7 @@ export default class Room extends Component {
     return (
       <div>
         <MessageList room={this.props.id} />
-        <input
-          type="text"
-          value={this.state.message}
-          onChange={(event) => this.setState({ message: event.target.value })}
-          onKeyUp={(event) => {
-            if (event.key === "Enter") {
-              this.sendMessage(this.state.message);
-            }
-          }}
-        />
+        <MessageInput sendMessage={this.props.sendMessage} />
       </div>
     );
   }
