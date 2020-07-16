@@ -36,7 +36,6 @@ routes.set("/messages", async (request: ServerRequest, store: Store) => {
   }, {});
 
   if (params.room) {
-    console.log(store.rooms[params.room]);
     await json(request)({
       body: JSON.stringify(
         store.rooms[params.room].map((message) => ({

@@ -14,7 +14,6 @@ export default class Room extends Component {
     this.props.socket.onmessage = (event) => {
       const action = JSON.parse(event.data);
 
-      console.log(action);
       if (action.type === "NEW_MESSAGE") {
         this.setState({
           messages: [
