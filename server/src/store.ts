@@ -1,11 +1,14 @@
 type Message = {
-  user: string;
+  user: number;
   content: string;
+  time: Date;
 };
 
-type User = {
+export type User = {
+  id?: number;
   name: string | null;
-  room: string;
+  room: string | null;
+  socket: any;
 };
 
 type StoreContainer = {
@@ -17,15 +20,17 @@ export type Store = {
     [key: string]: Message[];
   };
   users: {
-    [key: string]: User;
+    [key: number]: User;
   };
 };
 
 const store: StoreContainer = {
   current: {
     rooms: {
-      a: [],
-      b: [],
+      one: [],
+      two: [],
+      three: [],
+      four: [],
     },
     users: {},
   },
@@ -33,7 +38,7 @@ const store: StoreContainer = {
 
 type Action = { type: string; [key: string]: any };
 
-function reducer(state: Store, { type, ...action }: Action) {
+function reducer(state: Store, { type, ...action }: Action): Store {
   if (type === "JOIN_ROOM") {
     return {
       ...state,
@@ -68,18 +73,21 @@ function reducer(state: Store, { type, ...action }: Action) {
         [action.id]: {
           name: action.name,
           room: null,
+          socket: action.socket,
         },
       },
     };
   }
 
   if (type === "REMOVE_USER") {
-    const { [action.id]: deleted, ...rest } = state.users;
-
     return {
       ...state,
       users: {
-        ...rest,
+        ...state.users,
+        [action.id]: {
+          ...state.users[action.id],
+          socket: null,
+        },
       },
     };
   }
@@ -110,13 +118,15 @@ function reducer(state: Store, { type, ...action }: Action) {
   if (type === "ADD_MESSAGE") {
     const room = state.users[action.userid].room;
 
+    if (!room) throw new Error("Shouldn't add a message if not in a room");
+
     return {
       ...state,
       rooms: {
         ...state.rooms,
         [room]: [
           ...state.rooms[room],
-          { content: action.message, user: action.userid },
+          { ...action.message, user: action.userid },
         ],
       },
     };
@@ -130,8 +140,13 @@ export const dispatch = (action: Action) => {
   store.current = reducer(store.current, action);
 };
 
-export const addUser = (id: number, name: string = "") => {
-  dispatch({ type: "ADD_USER", id, name });
+export const addUser = (socket: any) => {
+  dispatch({
+    type: "ADD_USER",
+    id: Number(socket.conn.rid),
+    name: "Anonymous",
+    socket,
+  });
 };
 
 export const removeUser = (id: number) => {

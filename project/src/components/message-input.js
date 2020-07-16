@@ -9,7 +9,9 @@ export default class MessageInput extends Component {
     return (
       <input
         type="text"
+        className="text-input"
         value={this.state.message}
+        placeholder="Type Message"
         onChange={(event) => this.setState({ message: event.target.value })}
         onKeyUp={(event) => {
           if (event.key === "Enter") {

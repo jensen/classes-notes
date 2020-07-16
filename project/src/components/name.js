@@ -9,7 +9,9 @@ export default class Name extends Component {
     return (
       <input
         type="text"
+        className="text-input"
         value={this.state.name}
+        placeholder="Enter Name"
         onChange={(event) =>
           this.setState({
             name: event.target.value,

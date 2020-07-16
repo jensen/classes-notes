@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto Mono", sans-serif;
+}
+
+html,
+body,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style-type: none;
+}
+
+button {
+  color: white;
+  background-color: tomato;
+  border: 0;
+  padding: 1rem;
+  width: 100%;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: rebeccapurple;
+  color: white;
+}
+
+input:focus,
+button:focus {
+  outline: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-list {
+  display: flex;
+}
+
+.room-list__item {
+  flex: 1;
+}
+
+.text-input {
+  background-color: aliceblue;
+  width: 100%;
+  font-size: 2rem;
+  border: 0;
+  padding: 0.5rem 0.5rem;
+}
+
+.text-input:focus {
+  border: 0;
+}
+
+.user-name {
+  font-size: 2rem;
+  padding: 0 0.5rem;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.message-list__item {
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px dashed rgba(200, 200, 200, 0.5);
+}
+
+.message-list__item:first-of-type {
+  border-bottom: 0;
+}

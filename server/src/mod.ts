@@ -18,19 +18,38 @@ import {
 
 const PORT = 8080;
 
+const broadcast = async (id: number, data: any) => {
+  const store = getStore();
+  const users = Object.keys(store.users).map((user: string) => ({
+    ...store.users[Number(user)],
+    id: Number(user),
+  }));
+
+  Promise.all(
+    users.filter((user) => {
+      if (user.id === id) return false;
+
+      if (user.socket && user.room === store.users[id].room) {
+        return user.socket.send(
+          JSON.stringify({
+            type: "NEW_MESSAGE",
+            ...data,
+            user: store.users[id].name,
+          })
+        );
+      }
+
+      return false;
+    })
+  ).then((all) => {
+    console.log(`ws:broadcast ${all.length} clients`);
+  });
+};
+
 async function handleWebsocketEvent(sock: WebSocket) {
   console.log("ws:connected");
 
-  addUser(sock.conn.rid);
-
-  // const broadcast = (data) => {
-  //   const users = getStore().users;
-
-  //   for (let user in users) {
-  //     if (user !== sock.conn.rid) {
-  //     }
-  //   }
-  // };
+  addUser(sock);
 
   try {
     for await (const ev of sock) {
@@ -46,7 +65,6 @@ async function handleWebsocketEvent(sock: WebSocket) {
           name?: string;
         } = JSON.parse(ev);
 
-        // await sock.send(ev);
         if (data.room && data.type === "JOIN_ROOM") {
           joinRoom(sock.conn.rid, data.room);
         }
@@ -60,12 +78,19 @@ async function handleWebsocketEvent(sock: WebSocket) {
         }
 
         if (data.message && data.type === "NEW_MESSAGE") {
-          addMessage(sock.conn.rid, data.message);
+          const message = {
+            content: data.message,
+            time: new Date(),
+          };
+          addMessage(sock.conn.rid, message);
+          broadcast(sock.conn.rid, message);
         }
       } else if (isWebSocketCloseEvent(ev)) {
         const { code, reason } = ev;
+
+        removeUser(sock.conn.rid);
+
         console.log("ws:close", code, reason);
-        // removeUser(sock.conn.rid);
       }
     }
   } catch (err) {

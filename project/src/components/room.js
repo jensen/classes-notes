@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { Component } from "react";
 import MessageList from "components/message-list";
 import MessageInput from "components/message-input";
-import RemoteStore from "debug/remote-store";
 
 import Name from "components/name";
 
@@ -12,17 +11,25 @@ export default class Room extends Component {
   };
 
   componentDidMount() {
+    this.props.socket.onmessage = (event) => {
+      const action = JSON.parse(event.data);
+
+      console.log(action);
+      if (action.type === "NEW_MESSAGE") {
+        this.setState({
+          messages: [
+            ...this.state.messages,
+            { content: action.content, user: action.user, time: action.time },
+          ],
+        });
+      }
+    };
+
     axios
       .get(`/messages?room=${this.props.room}`)
       .then(({ data: messages }) => this.setState({ messages }));
 
     this.send({ type: "JOIN_ROOM", room: this.props.room });
-
-    this.props.socket.omessage = (event) => {
-      const action = JSON.parse(event);
-
-      console.log(action);
-    };
   }
 
   send(data) {
@@ -43,6 +50,7 @@ export default class Room extends Component {
         {
           user: this.props.name,
           content: message,
+          time: new Date(),
         },
       ],
     });
@@ -64,13 +72,14 @@ export default class Room extends Component {
 
   render() {
     return (
-      <div>
-        <MessageList room={this.props.room} messages={this.state.messages} />
+      <main>
         {this.props.name ? (
-          <>
-            {this.props.name}
-            <MessageInput sendMessage={this.sendMessage.bind(this)} />
-          </>
+          <section>
+            <div className="user-name">{this.props.name}</div>
+            <div>
+              <MessageInput sendMessage={this.sendMessage.bind(this)} />
+            </div>
+          </section>
         ) : (
           <Name
             value={this.state.value}
@@ -80,8 +89,8 @@ export default class Room extends Component {
             }}
           />
         )}
-        <RemoteStore />
-      </div>
+        <MessageList room={this.props.room} messages={this.state.messages} />
+      </main>
     );
   }
 }
