@@ -5,7 +5,7 @@ import Room from "components/room";
 export default class Application extends Component {
   state = {
     name: "",
-    room: null,
+    room: "",
   };
 
   componentDidMount() {

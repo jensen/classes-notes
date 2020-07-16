@@ -31,8 +31,8 @@ export default class RoomList extends Component {
         {rooms}
         <li className="room-list__item" key="leave">
           <button
-            disabled={this.props.room === null}
-            onClick={() => this.chooseRoom(null)}
+            disabled={this.props.room === ""}
+            onClick={() => this.chooseRoom("")}
           >
             leave
           </button>

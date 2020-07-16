@@ -313,4 +313,21 @@ class Counter extends Component {
 
 ## Live Example
 
+Today we build a WebSocket based, multi-room chat application. We will use ES6 classes to build components. We will introduce LifeCyle through the use of `componentDidMount`, `componentDidUpdate` and `componentWillUnmount`.
+
+We already have a server that provides the real time update functionality. We now need to connect our React application to using the messaging API. We also have a small HTTP API available to retrieve larger chunks of data from the server when we load the application intially.
+
+- When the `Application` component mounts we will connect to our `WebSocket` server. When it unmounts we will `close()` our connection.
+- When the `RoomList` component mounts we will make a request using `axios` to the `/rooms` endpoint. We expect to receive a list of room names.
+- When we mount the `Room` component we will make a request using `axios` to the `/messages?room=<room id>` endpoint, setup socket event handlers and join the room by sending a message to the socket server. When we unmount the `Room` we will send a message to the socket server to leave the room.
+- When we change the `room` state in the `Application` component, our `Room` component will update when the new prop is passed down. If the room has changed, then the `Room` component will make a request using `axios` to the `/messages?room=<room id>` endpoint in the `componentDidUpdate` lifecycle method.
+
+The `Room` component will unmount whenever we set the state of room to `""` inside of `Application` because we have a conditional render instruction in the render method.
+
 ## Bonus
+
+The server is implemented in (mostly) TypeScript and uses the [deno](https://deno.land/) runtime. Deno is a project started a few years ago by [Ryan Dahl](https://github.com/ry) who happens to alow be the creator of [node](https://nodejs.org/en/).
+
+> Both `node` and `deno` share the same four characters in the english alphabet.
+
+Some people joke that the next runtime Ryan creates will be called _endo_ or _oden_. It can be useful to learn from these types of projects and their history. Ryan was kind enough to do a presentation called [10 Things I regret About Node.js](https://www.youtube.com/watch?v=M3BM9TB-8yA) where he explains his motivation for building another runtime environment.

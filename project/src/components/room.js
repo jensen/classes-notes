@@ -81,14 +81,13 @@ export default class Room extends Component {
           </section>
         ) : (
           <Name
-            value={this.state.value}
             setName={(name) => {
               this.props.setName(name);
               this.send({ type: "SET_NAME", name: name });
             }}
           />
         )}
-        <MessageList room={this.props.room} messages={this.state.messages} />
+        <MessageList messages={this.state.messages} />
       </main>
     );
   }

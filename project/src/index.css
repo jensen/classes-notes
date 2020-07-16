@@ -72,6 +72,7 @@ button:focus {
 }
 
 .user-name {
+  color: #a4d4ff;
   background-color: aliceblue;
   font-size: 2rem;
   padding: 0 0.5rem;
