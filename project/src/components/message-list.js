@@ -1,23 +1,12 @@
 import React, { Component } from "react";
-import axios from "axios";
 
-export default class RoomList extends Component {
-  state = {
-    messages: [],
-  };
-
-  componentDidMount() {
-    axios
-      .get(`/messages?room=${this.props.room}`)
-      .then(({ data: messages }) => this.setState({ messages }));
-  }
-
+export default class MessageList extends Component {
   render() {
     return (
       <ul>
-        {this.state.messages.map((message) => (
+        {this.props.messages.map((message) => (
           <li>
-            {message.username} {message.content}
+            {message.user} - {message.content}
           </li>
         ))}
       </ul>

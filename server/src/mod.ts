@@ -10,8 +10,10 @@ import {
   getStore,
   addUser,
   removeUser,
-  changeName,
+  setName,
   joinRoom,
+  leaveRoom,
+  addMessage,
 } from "./store.ts";
 
 const PORT = 8080;
@@ -21,24 +23,49 @@ async function handleWebsocketEvent(sock: WebSocket) {
 
   addUser(sock.conn.rid);
 
+  // const broadcast = (data) => {
+  //   const users = getStore().users;
+
+  //   for (let user in users) {
+  //     if (user !== sock.conn.rid) {
+  //     }
+  //   }
+  // };
+
   try {
     for await (const ev of sock) {
       if (typeof ev === "string") {
         console.log("ws:text", ev);
+        const data: {
+          type: string;
+          message?: {
+            user: string;
+            content: string;
+          };
+          room?: string;
+          name?: string;
+        } = JSON.parse(ev);
+
         // await sock.send(ev);
-        if (ev.startsWith("join:")) {
-          const [command, roomid] = ev.split(":");
-          joinRoom(sock.conn.rid, roomid);
+        if (data.room && data.type === "JOIN_ROOM") {
+          joinRoom(sock.conn.rid, data.room);
         }
 
-        if (ev.startsWith("changename:")) {
-          const [command, name] = ev.split(":");
-          changeName(sock.conn.rid, name);
+        if (data.type === "LEAVE_ROOM") {
+          leaveRoom(sock.conn.rid);
+        }
+
+        if (data.name && data.type === "SET_NAME") {
+          setName(sock.conn.rid, data.name);
+        }
+
+        if (data.message && data.type === "NEW_MESSAGE") {
+          addMessage(sock.conn.rid, data.message);
         }
       } else if (isWebSocketCloseEvent(ev)) {
         const { code, reason } = ev;
         console.log("ws:close", code, reason);
-        removeUser(sock.conn.rid);
+        // removeUser(sock.conn.rid);
       }
     }
   } catch (err) {

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import RoomList from "components/room-list";
 import Room from "components/room";
-import Name from "components/name";
 
 export default class Application extends Component {
   state = {
@@ -10,28 +9,17 @@ export default class Application extends Component {
   };
 
   componentDidMount() {
-    this.socket = new WebSocket("ws://localhost:8080/ws");
-    this.socket.onopen = (event) => {};
-    this.socket.omessage = (event) => {
-      const action = JSON.parse(event);
-
-      console.log(action);
-    };
+    this.socket = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
   }
 
   componentWillUnmount() {
     this.socket.close();
   }
 
-  dispatch(action) {
-    this.socket.send(JSON.stringify(action));
-  }
-
-  changeName(name) {
+  setName(name) {
     this.setState({
       name,
     });
-    this.dispatch({ type: "CHANGE_NAME", name });
   }
 
   joinRoom(room) {
@@ -40,18 +28,22 @@ export default class Application extends Component {
     });
   }
 
-  sendMessage(message) {
-    this.dispatch({ type: "ADD_MESSAGE", message });
-  }
-
   render() {
     return (
       <>
-        <Room
+        <RoomList
           room={this.state.room}
-          sendMessage={this.sendMessage.bind(this)}
+          selectRoom={this.joinRoom.bind(this)}
         />
-        <RoomList selectRoom={this.joinRoom.bind(this)} />
+        {this.socket && this.state.room && (
+          <Room
+            user={this.state.user}
+            room={this.state.room}
+            socket={this.socket}
+            name={this.state.name}
+            setName={this.setName.bind(this)}
+          />
+        )}
       </>
     );
   }

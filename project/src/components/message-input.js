@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import axios from "axios";
 
 export default class MessageInput extends Component {
   state = {
@@ -15,6 +14,9 @@ export default class MessageInput extends Component {
         onKeyUp={(event) => {
           if (event.key === "Enter") {
             this.props.sendMessage(this.state.message);
+            this.setState({
+              message: "",
+            });
           }
         }}
       />

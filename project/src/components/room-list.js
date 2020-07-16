@@ -10,13 +10,24 @@ export default class RoomList extends Component {
     axios.get("/rooms").then(({ data: rooms }) => this.setState({ rooms }));
   }
 
+  chooseRoom(room) {
+    this.props.selectRoom(room);
+  }
+
   render() {
     const rooms = this.state.rooms.map((room) => (
-      <li>
-        <button onClick={() => this.props.selectRoom(room)}>{room}</button>
+      <li key={room}>
+        <button onClick={() => this.chooseRoom(room)}>{room}</button>
       </li>
     ));
 
-    return <ul>{rooms}</ul>;
+    return (
+      <ul>
+        {rooms}
+        {this.props.room && (
+          <button onClick={() => this.chooseRoom(null)}>leave</button>
+        )}
+      </ul>
+    );
   }
 }

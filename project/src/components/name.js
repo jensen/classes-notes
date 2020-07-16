@@ -17,7 +17,7 @@ export default class Name extends Component {
         }
         onKeyUp={(event) => {
           if (event.key === "Enter") {
-            this.props.changeName(this.state.name);
+            this.props.setName(this.state.name);
           }
         }}
       />

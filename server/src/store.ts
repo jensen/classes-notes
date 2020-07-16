@@ -24,12 +24,7 @@ export type Store = {
 const store: StoreContainer = {
   current: {
     rooms: {
-      a: [
-        {
-          user: "Karl",
-          content: "Test",
-        },
-      ],
+      a: [],
       b: [],
     },
     users: {},
@@ -46,7 +41,7 @@ function reducer(state: Store, { type, ...action }: Action) {
         ...state.users,
         [action.userid]: {
           ...state.users[action.userid],
-          room: action.roomid,
+          room: action.room,
         },
       },
     };
@@ -73,7 +68,6 @@ function reducer(state: Store, { type, ...action }: Action) {
         [action.id]: {
           name: action.name,
           room: null,
-          socket: action.socket,
         },
       },
     };
@@ -100,14 +94,30 @@ function reducer(state: Store, { type, ...action }: Action) {
     };
   }
 
-  if (type === "CHANGE_NAME") {
+  if (type === "SET_NAME") {
     return {
       ...state,
       users: {
+        ...state.users,
         [action.userid]: {
           ...state.users[action.userid],
           name: action.name,
         },
+      },
+    };
+  }
+
+  if (type === "ADD_MESSAGE") {
+    const room = state.users[action.userid].room;
+
+    return {
+      ...state,
+      rooms: {
+        ...state.rooms,
+        [room]: [
+          ...state.rooms[room],
+          { content: action.message, user: action.userid },
+        ],
       },
     };
   }
@@ -128,10 +138,18 @@ export const removeUser = (id: number) => {
   dispatch({ type: "REMOVE_USER", id });
 };
 
-export const joinRoom = (userid: number, roomid: string) => {
-  dispatch({ type: "JOIN_ROOM", userid, roomid });
+export const joinRoom = (userid: number, room: string) => {
+  dispatch({ type: "JOIN_ROOM", userid, room });
 };
 
-export const changeName = (userid: number, name: string) => {
-  dispatch({ type: "CHANGE_NAME", userid, name });
+export const leaveRoom = (userid: number) => {
+  dispatch({ type: "LEAVE_ROOM", userid });
+};
+
+export const setName = (userid: number, name: string) => {
+  dispatch({ type: "SET_NAME", userid, name });
+};
+
+export const addMessage = (userid: number, message: any) => {
+  dispatch({ type: "ADD_MESSAGE", userid, message });
 };
