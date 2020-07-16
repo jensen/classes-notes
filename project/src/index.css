@@ -24,7 +24,7 @@ ul {
 
 button {
   color: white;
-  background-color: tomato;
+  background-color: transparent;
   border: 0;
   padding: 1rem;
   width: 100%;
@@ -32,7 +32,7 @@ button {
 
 button:hover {
   cursor: pointer;
-  background-color: rebeccapurple;
+  background-color: #47e3ff;
   color: white;
 }
 
@@ -52,6 +52,11 @@ button:focus {
 
 .room-list__item {
   flex: 1;
+  background-color: tomato;
+}
+
+.room-list__item--current {
+  background-color: #ff3814;
 }
 
 .text-input {

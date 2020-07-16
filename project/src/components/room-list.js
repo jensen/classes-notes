@@ -16,7 +16,12 @@ export default class RoomList extends Component {
 
   render() {
     const rooms = this.state.rooms.map((room) => (
-      <li className="room-list__item" key={room}>
+      <li
+        className={`room-list__item ${
+          this.props.room === room ? "room-list__item--current" : ""
+        }`}
+        key={room}
+      >
         <button onClick={() => this.chooseRoom(room)}>{room}</button>
       </li>
     ));

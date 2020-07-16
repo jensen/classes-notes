@@ -37,7 +37,6 @@ export default class Application extends Component {
         />
         {this.socket && this.state.room && (
           <Room
-            user={this.state.user}
             room={this.state.room}
             socket={this.socket}
             name={this.state.name}
